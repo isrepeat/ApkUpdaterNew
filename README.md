@@ -42,7 +42,15 @@ Set-Location $projectRoot
 ```
 
 Пути к `AndroidAppPreviewer.exe` для Debug и Release находятся в параметрах
-`Preview.Executable.Debug` и `Preview.Executable.Release` файла `android-build.psd1`.
+`Paths.PreviewerDebugExecutablePath` и `Paths.PreviewerReleaseExecutablePath`
+ближайшего родительского `Android.SharedProps.json`.
+
+Скрипты `Scripts/run-android-app-previewer-debug.bat` и Release используют
+инкрементальную сборку: закреплённый AndroidBuildTools повторно не скачивается,
+актуальность XamlRuntime из локального feed проверяется по версиям архивов,
+неизменённые XAML не генерируются повторно. CMake получает готовые пути из
+PowerShell, проверяет конфигурацию и PluginSDK; Ninja собирает только изменения.
+Для удалённого feed или отсутствующего пакета остаётся обычный NuGet restore.
 
 ## Android-страница
 

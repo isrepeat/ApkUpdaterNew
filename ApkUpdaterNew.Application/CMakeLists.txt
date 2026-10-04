@@ -7,15 +7,10 @@ if (NOT DEFINED APKUPDATERNEW_PACKAGE_VERSION)
     set(APKUPDATERNEW_PACKAGE_VERSION "${apkupdaternew_version_base}.0")
 endif()
 file(MAKE_DIRECTORY "${apkupdaternew_project_root}/!Generated/Build")
-file(WRITE "${apkupdaternew_project_root}/!Generated/Build/BuildVersion.h"
+fn_androidappkit_write_if_changed("${apkupdaternew_project_root}/!Generated/Build/BuildVersion.h"
     "#pragma once\n#define APKUPDATERNEW_PACKAGE_VERSION \"${APKUPDATERNEW_PACKAGE_VERSION}\"")
 set(apkupdaternew_generated_root "${apkupdaternew_project_root}/!Generated/ApkUpdaterNew.Application/Xaml")
-execute_process(
-    COMMAND powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass
-        -File "${apkupdaternew_project_root}/build.ps1" -Command generate-xaml
-    WORKING_DIRECTORY "${apkupdaternew_project_root}"
-    COMMAND_ERROR_IS_FATAL ANY
-)
+fn_androidappkit_generate_xaml("${apkupdaternew_project_root}")
 file(GLOB_RECURSE apkupdaternew_application_sources CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/Base/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Base/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Core/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Core/*.h"
