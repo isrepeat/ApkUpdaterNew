@@ -1,0 +1,41 @@
+set(apkupdaternew_project_root "${CMAKE_CURRENT_SOURCE_DIR}/..")
+# Android-сборка передаёт фактическую версию; preview использует базовую версию проекта.
+if (NOT DEFINED APKUPDATERNEW_PACKAGE_VERSION)
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${apkupdaternew_project_root}/version.properties")
+    file(STRINGS "${apkupdaternew_project_root}/version.properties" apkupdaternew_version_line REGEX "^VERSION_NAME_BASE=")
+    string(REGEX REPLACE "^VERSION_NAME_BASE=" "" apkupdaternew_version_base "${apkupdaternew_version_line}")
+    set(APKUPDATERNEW_PACKAGE_VERSION "${apkupdaternew_version_base}.0")
+endif()
+file(MAKE_DIRECTORY "${apkupdaternew_project_root}/!Generated/Build")
+file(WRITE "${apkupdaternew_project_root}/!Generated/Build/BuildVersion.h"
+    "#pragma once\n#define APKUPDATERNEW_PACKAGE_VERSION \"${APKUPDATERNEW_PACKAGE_VERSION}\"")
+set(apkupdaternew_generated_root "${apkupdaternew_project_root}/!Generated/ApkUpdaterNew.Application/Xaml")
+execute_process(
+    COMMAND powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass
+        -File "${apkupdaternew_project_root}/build.ps1" -Command generate-xaml
+    WORKING_DIRECTORY "${apkupdaternew_project_root}"
+    COMMAND_ERROR_IS_FATAL ANY
+)
+file(GLOB_RECURSE apkupdaternew_application_sources CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/Base/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Base/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Core/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Core/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Interface/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Model/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/Model/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/UI/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/UI/*.h")
+file(GLOB_RECURSE apkupdaternew_generated_xaml CONFIGURE_DEPENDS "${apkupdaternew_generated_root}/*.xaml.cpp")
+if (NOT apkupdaternew_generated_xaml)
+    message(FATAL_ERROR "XamlCompiler did not generate application sources.")
+endif()
+add_library(apkupdaternew_application STATIC ${apkupdaternew_application_sources} ${apkupdaternew_generated_xaml})
+set_target_properties(apkupdaternew_application PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_compile_features(apkupdaternew_application PUBLIC cxx_std_20)
+target_include_directories(apkupdaternew_application PUBLIC "${apkupdaternew_project_root}")
+target_link_libraries(apkupdaternew_application PUBLIC
+    XamlRuntime::Logging
+    XamlRuntime::Runtime)
+if (NOT ANDROID)
+    target_compile_definitions(apkupdaternew_application PUBLIC ANDROID_APP_PREVIEWER)
+endif()
+if (MSVC)
+    target_compile_options(apkupdaternew_application PRIVATE /utf-8)
+endif()
