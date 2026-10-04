@@ -44,13 +44,33 @@ Set-Location $projectRoot
 Пути к `AndroidAppPreviewer.exe` для Debug и Release находятся в параметрах
 `Preview.Executable.Debug` и `Preview.Executable.Release` файла `android-build.psd1`.
 
+## Android-страница
+
+`MainPage.kt` содержит единственную Activity приложения и наследуется от
+`com.isrepeat.androidappkit.NativeOpenGlActivity` (AndroidAppKit 1.0.15 или новее).
+Библиотека создаёт GLSurfaceView, управляет EGL, рендером, touch, Back и временем
+жизни native-сессии. Отдельный MainActivity не нужен; манифест запускает MainPage.
+
+Обработчики `onPageCreated(savedInstanceState)`, `onPageResumed()`,
+`onPagePaused()`, `onPageDestroyed()` и `onPageIntent(intent)` выполняются на UI-потоке.
+`onPageIntent` получает как начальный Intent, так и последующие onNewIntent.
+`onPageTouchEvent(event)` и `onBackRequested()` могут вернуть true, чтобы обработать
+событие в Kotlin; по умолчанию библиотека передаёт его в C++ на GL-потоке.
+Для собственных JNI-команд используйте `withNativeSession { session -> ... }`:
+она ставит вызов в GL-очередь и не принимает новые команды после уничтожения страницы.
+JNI-методы остаются в MainPage, поэтому имена экспортов C++ сохраняются.
+
+Для прозрачного окна переопределите `translucentSurface = true` и используйте
+прозрачную тему Activity. Библиотека запросит RGBA8888 и прозрачный Surface;
+альфу содержимого задаёт XAML. По умолчанию поверхность непрозрачна.
+
 ## Логирование Android
 
 Кнопка `Send logs` после `Update` отправляет журнал текущего сеанса в Google Drive,
 в папку `Android/ApkUpdaterNew` рядом с APK. Результат отображается на главной
 странице; при необходимости Google запрашивает доступ к Drive.
 
-При запуске `MainActivity` создаётся журнал сеанса в
+При запуске `MainPage` создаётся журнал сеанса в
 `Downloads/com.isrepeat/ApkUpdaterNew`. Kotlin передаёт открытый file descriptor
 в native host через `NativeSessionLog` из AndroidAppKit. Android host настраивает
 `Helpers.Logging` на этот файл, поэтому записи `LOG_INFO`, `LOG_WARNING` и
@@ -101,7 +121,7 @@ GL-потока в `AppSessionController`, затем в XAML binding `Status`. 
 проекта и связанный каталог secrets.
 ## Прозрачное окно OpenGLES
 
-MainActivity использует прозрачную тему, GLSurfaceView — RGBA8888 и
+MainPage использует прозрачную тему, GLSurfaceView — RGBA8888 и
 PixelFormat.TRANSLUCENT. Surface располагается поверх содержимого собственного
 окна; это не SYSTEM_ALERT_WINDOW и отдельное разрешение overlay не требуется.
 На создании поверхности проверяется наличие восьми бит альфы framebuffer.
@@ -116,7 +136,7 @@ OpenGLESRenderer использует отдельные коэффициент�
 RGB = Cs * As + Cd * (1 - As), A = As + Ad * (1 - As).
 Это сохраняет premultiplied RGB и корректную альфу для композиции Android.
 Исправление включено в локальный пакет XamlRuntime начиная с 1.0.25.8.
-AndroidAppKit, AndroidCoreSdk и синтаксис XAML менять не потребовалось.
+Настройка Android-поверхности находится в NativeOpenGlActivity из AndroidAppKit.
 
 Проверка на устройстве: открыть приложение поверх рабочего стола, убедиться,
 что фон просвечивает; перейти в Settings (фон непрозрачен) и вернуться.
