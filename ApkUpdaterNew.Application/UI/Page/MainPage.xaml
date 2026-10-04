@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Page id="mainPage"
-      background="#1E1E1E"
+      background="#801E1E1E"
       xmlns="urn:apkupdaternew:xaml"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <StackPanel width="320"
@@ -9,22 +9,22 @@
                 orientation="Vertical">
         <TextBlock id="packageVersionText"
                    margin="0 0 0 25"
+                   horizontalAlignment="Center"
                    fontSize="42"
                    fontWeight="Bold"
                    foreground="#CCFFFFFF"
-                   horizontalAlignment="Center"
                    text="{Binding PackageVersion}"/>
         <TextBlock id="helloText"
                    margin="0 0 0 20"
+                   horizontalAlignment="Center"
                    fontSize="32"
                    fontWeight="Bold"
                    foreground="#FFFFFF"
                    textWrapping="Wrap"
-                   horizontalAlignment="Center"
-                   text="Hello, ApkUpdaterNew!"/>
+                   text="Полупрозрачное окно OpenGLES"/>
         <Button id="openSettingsButton"
-                margin="0 0 0 20"
                 height="72"
+                margin="0 0 0 20"
                 contentAlignment="Center"
                 fontSize="36"
                 fontWeight="Bold"
@@ -33,8 +33,8 @@
                 command="{Binding NavigateToSettingsCommand}"
                 text="Open settings"/>
         <Button id="updateButton"
-                margin="0 0 0 16"
                 height="72"
+                margin="0 0 0 16"
                 contentAlignment="Center"
                 fontSize="36"
                 fontWeight="Bold"

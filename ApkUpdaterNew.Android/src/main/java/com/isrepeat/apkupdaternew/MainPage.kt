@@ -1,15 +1,30 @@
 package com.isrepeat.apkupdaternew
 
-class MainPage(context: android.content.Context, dispatcher: NativeCommandDispatcher) : android.opengl.GLSurfaceView(context), android.opengl.GLSurfaceView.Renderer {
+class MainPage(context: android.content.Context, dispatcher: NativeCommandDispatcher)
+    : android.opengl.GLSurfaceView(context)
+    , android.opengl.GLSurfaceView.Renderer {
+
     private var handle = nativeCreate(dispatcher)
     private var destroyed = false
 
     init {
         setEGLContextClientVersion(3)
+        // Альфа кадра из XamlRuntime участвует в композиции окна Android.
+        setEGLConfigChooser(8, 8, 8, 8, 0, 0)
+        holder.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
+        setZOrderOnTop(true)
         setRenderer(this)
     }
 
-    override fun onSurfaceCreated(gl: javax.microedition.khronos.opengles.GL10?, config: javax.microedition.khronos.egl.EGLConfig?) = Unit
+    override fun onSurfaceCreated(gl: javax.microedition.khronos.opengles.GL10?, config: javax.microedition.khronos.egl.EGLConfig?) {
+        // Проверяем реальный framebuffer, а не только запрошенную EGL-конфигурацию.
+        val alphaBits = IntArray(1)
+        android.opengl.GLES30.glGetIntegerv(android.opengl.GLES30.GL_ALPHA_BITS, alphaBits, 0)
+        if (alphaBits[0] < 8) {
+            throw IllegalStateException("The OpenGLES window requires an 8-bit alpha channel")
+        }
+        NativeDiagnostics.log("OpenGLES framebuffer alpha bits: ${alphaBits[0]}")
+    }
 
     override fun onSurfaceChanged(gl: javax.microedition.khronos.opengles.GL10?, width: Int, height: Int) {
         nativeSurface(handle, width, height)
