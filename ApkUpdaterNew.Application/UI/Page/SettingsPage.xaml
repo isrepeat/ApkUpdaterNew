@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Page id="settingsPage"
-      background="#1E1E1E"
+      background="#FF1E1E1E"
       xmlns="urn:apkupdaternew:xaml"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Page.Storyboards>
+        <Storyboard trigger="Show">
+            <ColorAnimation property="background"
+                            from="#801E1E1E"
+                            to="#FF1E1E1E"
+                            duration="300"
+                            easing="CubicOut"/>
+        </Storyboard>
+    </Page.Storyboards>
     <StackPanel width="320"
                 verticalAlignment="Center"
                 horizontalAlignment="Center"

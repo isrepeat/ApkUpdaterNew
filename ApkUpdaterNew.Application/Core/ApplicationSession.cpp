@@ -61,6 +61,6 @@ namespace apkupdaternew::application::core {
     }
 
     void ApplicationSession::Render(xaml::IRenderBackend& renderer) {
-        xaml::Render(this->Root(), renderer, this->renderers);
+        this->pageManager.Render(renderer, this->renderers);
     }
 }
