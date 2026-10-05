@@ -13,16 +13,18 @@ namespace apkupdaternew::application::core {
     public:
         using DocumentSaveHandler = std::function<bool(const model::ApplicationStateDocument&)>;
 
-        explicit ApplicationStateStore(model::ApplicationStateDocument document, DocumentSaveHandler documentSaveHandler = {});
+        explicit ApplicationStateStore(
+            model::ApplicationStateDocument applicationStateDocument,
+            DocumentSaveHandler documentSaveHandler = {});
         ~ApplicationStateStore() = default;
 
         ApplicationStateStore(const ApplicationStateStore&) = delete;
         ApplicationStateStore& operator=(const ApplicationStateStore&) = delete;
 
         const model::ApplicationStateDocument& CurrentDocument() const;
-        bool TrySaveDocument(model::ApplicationStateDocument candidate);
+        bool TrySaveDocument(model::ApplicationStateDocument applicationStateDocument);
 #if defined(ANDROID_APP_PREVIEWER)
-        void preview_LoadSessionDocument(model::ApplicationStateDocument candidate);
+        void preview_LoadSessionDocument(model::ApplicationStateDocument applicationStateDocument);
         bool preview_SaveSessionDocumentToPersistentStorage();
 #endif
 
@@ -30,7 +32,7 @@ namespace apkupdaternew::application::core {
         std::unique_ptr<model::ApplicationStateDocument> document;
         DocumentSaveHandler documentSaveHandler;
 #if defined(ANDROID_APP_PREVIEWER)
-        bool isUsingPreviewSessionDocument = false;
+        bool preview_isUsingPreviewSessionDocument = false;
 #endif
     };
 }

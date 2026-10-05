@@ -158,7 +158,13 @@ extern "C" JNIEXPORT void JNICALL Java_com_isrepeat_apkupdaternew_MainPage_nativ
     }
 }
 
-extern "C" JNIEXPORT void JNICALL Java_com_isrepeat_apkupdaternew_MainPage_nativePointer(JNIEnv* environment, jobject, jlong handle, jint action, jfloat x, jfloat y) {
+extern "C" JNIEXPORT void JNICALL Java_com_isrepeat_apkupdaternew_MainPage_nativePointer(
+    JNIEnv* environment,
+    jobject,
+    jlong handle,
+    jint action,
+    jfloat x,
+    jfloat y) {
     try {
         auto& host = _details::Host(handle);
         if (!host.renderer) {

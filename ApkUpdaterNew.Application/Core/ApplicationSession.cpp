@@ -3,8 +3,10 @@
 #include <utility>
 
 namespace apkupdaternew::application::core {
-    ApplicationSession::ApplicationSession(model::ApplicationStateDocument document, ApplicationStateStore::DocumentSaveHandler save)
-        : stateStore(std::move(document), std::move(save))
+    ApplicationSession::ApplicationSession(
+        model::ApplicationStateDocument applicationStateDocument,
+        ApplicationStateStore::DocumentSaveHandler save)
+        : stateStore(std::move(applicationStateDocument), std::move(save))
         , repository(this->stateStore)
         , pageManager(this->repository, this->controller) {
     }

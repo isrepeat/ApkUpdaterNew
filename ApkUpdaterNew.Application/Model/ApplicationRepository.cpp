@@ -3,15 +3,15 @@
 #include <utility>
 
 namespace apkupdaternew::application::model {
-    ApplicationRepository::ApplicationRepository(core::ApplicationStateStore& store)
-        : base::AppRepositoryBase(store) {
+    ApplicationRepository::ApplicationRepository(core::ApplicationStateStore& applicationStateStore)
+        : base::AppRepositoryBase(applicationStateStore) {
     }
 #if defined(ANDROID_APP_PREVIEWER)
     //
     // AppRepositoryBase
     //
-    bool ApplicationRepository::preview_IsSessionDocumentEquivalentTo(const ApplicationStateDocument& document) const {
-        return this->base::AppRepositoryBase::State() == document;
+    bool ApplicationRepository::preview_IsSessionDocumentEquivalentTo(const ApplicationStateDocument& applicationStateDocument) const {
+        return this->base::AppRepositoryBase::State() == applicationStateDocument;
     }
 
     void ApplicationRepository::preview_ReloadFromStateStore() {

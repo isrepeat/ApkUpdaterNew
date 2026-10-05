@@ -25,7 +25,9 @@ namespace apkupdaternew::preview::api {
             throw std::invalid_argument("Plugin-info buffer and positive capacity are required");
         }
         const std::string pluginInfo = std::format(
-            R"({{"applicationId":"ApkUpdaterNew","displayName":"ApkUpdaterNew","resourceRootRelativePath":"Resources","sourceMarkupDirectory":"{}","sourceEntryMarkupPath":"{}","sourceControlsDirectory":"{}"}})",
+            R"({{"applicationId":"ApkUpdaterNew","displayName":"ApkUpdaterNew",)"
+            R"("resourceRootRelativePath":"Resources","sourceMarkupDirectory":"{}",)"
+            R"("sourceEntryMarkupPath":"{}","sourceControlsDirectory":"{}"}})",
             APKUPDATERNEW_PREVIEW_SOURCE_MARKUP_DIRECTORY,
             APKUPDATERNEW_PREVIEW_SOURCE_ENTRY_MARKUP_PATH,
             APKUPDATERNEW_PREVIEW_SOURCE_CONTROLS_DIRECTORY);

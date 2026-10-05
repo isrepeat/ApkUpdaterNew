@@ -19,6 +19,6 @@ namespace apkupdaternew::application::interface {
     class IHostCommandDispatcher {
     public:
         virtual ~IHostCommandDispatcher() = default;
-        virtual void Dispatch(core::HostCommand command, const core::HostCommandData& data = {}) = 0;
+        virtual void Dispatch(core::HostCommand hostCommand, const core::HostCommandData& hostCommandData = {}) = 0;
     };
 }
