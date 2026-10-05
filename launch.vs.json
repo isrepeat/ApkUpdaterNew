@@ -1,0 +1,18 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "dll",
+      "project": "CMakeLists.txt",
+      "name": "AndroidAppPreviewer — ApkUpdaterNew (Debug)",
+      "exe": "${workspaceRoot}\\..\\AndroidAppPreviewer\\!VS_TMP\\Build\\Debug\\x64\\AndroidAppPreviewer.WPF\\AndroidAppPreviewer.exe",
+      "args": [
+        "--plugin",
+        "${workspaceRoot}\\Build\\ApkUpdaterNew.PreviewPlugin\\Build\\Debug\\x64\\ApkUpdaterNew.PreviewPlugin\\ApkUpdaterNew.PreviewPlugin.dll"
+      ],
+      "currentDir": "${workspaceRoot}\\..\\AndroidAppPreviewer\\!VS_TMP\\Build\\Debug\\x64\\AndroidAppPreviewer.WPF",
+      "debugType": "native"
+    }
+  ]
+}

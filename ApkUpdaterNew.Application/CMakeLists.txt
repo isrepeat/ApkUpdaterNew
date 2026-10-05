@@ -21,7 +21,18 @@ file(GLOB_RECURSE apkupdaternew_generated_xaml CONFIGURE_DEPENDS "${apkupdaterne
 if (NOT apkupdaternew_generated_xaml)
     message(FATAL_ERROR "XamlCompiler did not generate application sources.")
 endif()
-add_library(apkupdaternew_application STATIC ${apkupdaternew_application_sources} ${apkupdaternew_generated_xaml})
+# Генерируемые исходники и заголовки показываем отдельно от рукописного кода.
+file(GLOB_RECURSE apkupdaternew_generated_headers CONFIGURE_DEPENDS "${apkupdaternew_generated_root}/*.xaml.h")
+set(apkupdaternew_generated_files
+    ${apkupdaternew_generated_xaml}
+    ${apkupdaternew_generated_headers}
+    "${apkupdaternew_project_root}/!Generated/Build/BuildVersion.h")
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${apkupdaternew_application_sources})
+source_group(TREE "${apkupdaternew_project_root}/!Generated" PREFIX "!Generated"
+    FILES ${apkupdaternew_generated_files})
+add_custom_target(apkupdaternew_generated SOURCES ${apkupdaternew_generated_files})
+set_target_properties(apkupdaternew_generated PROPERTIES FOLDER "!Generated")
+add_library(apkupdaternew_application STATIC ${apkupdaternew_application_sources} ${apkupdaternew_generated_files})
 set_target_properties(apkupdaternew_application PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_compile_features(apkupdaternew_application PUBLIC cxx_std_20)
 target_include_directories(apkupdaternew_application PUBLIC "${apkupdaternew_project_root}")
