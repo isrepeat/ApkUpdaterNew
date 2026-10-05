@@ -1,6 +1,7 @@
 #pragma once
 #include "../../ApkUpdaterNew.Application/Core/ApplicationSession.h"
 #include "./PreviewNavigationController.h"
+#include "./preview_PackageInstaller.h"
 
 namespace apkupdaternew::preview::session {
     class PreviewSession final {
@@ -16,6 +17,7 @@ namespace apkupdaternew::preview::session {
         void Resize(int width, int height);
         bool ReloadMarkup(std::string_view page, std::string_view markup, std::string_view sourcePath, std::string& error);
         void SetAnimationPlaybackRate(float value);
+        void ApplyScenario(std::string_view json);
         void PointerDown(float x, float y);
         void PointerMove(float x, float y);
         void PointerUp(float x, float y);
@@ -26,6 +28,8 @@ namespace apkupdaternew::preview::session {
 
     private:
         apkupdaternew::application::core::ApplicationSession applicationSession;
+        preview_PackageInstaller packageInstaller;
+        xaml::Size viewport;
         PreviewNavigationController navigation;
     };
 }

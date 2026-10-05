@@ -12,14 +12,14 @@ namespace apkupdaternew::application::core {
         interface::IPageNavigator& navigator;
         model::ApplicationRepository& repository;
         interface::IHostCommandDispatcher& hostCommands;
-        const AppSessionController& controller;
+        AppSessionController& controller;
     };
 
     template <typename... TPages>
     class PageRegistry final {
     public:
-        explicit PageRegistry(PageContext& context)
-            : pages(std::make_unique<TPages>(context)...) {
+        explicit PageRegistry(PageContext& pageContext)
+            : pages(std::make_unique<TPages>(pageContext)...) {
         }
 
         template <typename THandler>

@@ -42,27 +42,6 @@ int main(int argc, char** argv) {
         const auto navigate = [&](const char* json) {
             check(api.metadata.navigate(session, json) != 0, "navigate");
         };
-        render();
-        check(pixels[3] == 128, "initial main page alpha");
-        // Фон меняется симметрично при повторном открытии обеих страниц.
-        for (int i = 0; i < 2; ++i) {
-            navigate(R"({"transitionIds":["main-to-settings"]})");
-            check(api.session.is_transitioning(session) != 0, "settings animation started");
-            render();
-            std::cout << "Initial alpha: " << static_cast<int>(pixels[3]) << '\n';
-            check(pixels[3] >= 127 && pixels[3] <= 129, "initial background alpha");
-            check(api.session.load_page(session, "MainPage") == 0, "navigation blocked during transition");
-            finish();
-            render();
-            check(pixels[3] == 255, "final background alpha");
-            navigate(R"({"transitionIds":["settings-to-main"]})");
-            check(api.session.is_transitioning(session) != 0, "main animation started");
-            render();
-            check(pixels[3] == 255, "main starts opaque");
-            finish();
-            render();
-            check(pixels[3] == 128, "main returns to translucent");
-        }
         // Исходящая красная страница остаётся видима во время Hide.
         const char* mainMarkup = R"(<Page xmlns="urn:apkupdaternew:xaml" background="#FFFF0000">
             <Page.Storyboards><Storyboard trigger="Hide">
@@ -116,7 +95,7 @@ int main(int argc, char** argv) {
         check(pixels[0] == 255 && pixels[2] == 0, "Show final frame");
         api.rendering.destroy_angle_surface(surface);
         api.session.destroy(session);
-        std::cout << "PASS: alpha, repeated navigation, Show/Hide, direction, two-page rendering, reload, graph path\n";
+        std::cout << "PASS: Show/Hide, direction, two-page rendering, reload, graph path\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';

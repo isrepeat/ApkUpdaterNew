@@ -506,8 +506,11 @@ namespace apkupdaternew::preview::api {
         xp_session& session,
         const char* page,
         const char* json) {
-        bridge::LastError() = "The template does not define preview scenarios";
-        return 0;
+        if (page == nullptr || json == nullptr || std::string_view(page) != "MainPage") {
+            throw std::invalid_argument("Update scenarios belong to MainPage");
+        }
+        session.value.ApplyScenario(json);
+        return true;
     }
 
     bool SessionApi::ReloadMarkup(

@@ -23,11 +23,13 @@ namespace apkupdaternew::application::core {
             bool isDefault;
             NavigationTargetKind targetKind;
             std::string_view dataType;
-            bool previewDefault;
+            bool hasPreviewDefaultNavigationState;
         };
 #endif
 
-        PageManager(model::ApplicationRepository& repository, AppSessionController& controller);
+        PageManager(
+            model::ApplicationRepository& applicationRepository,
+            AppSessionController& appSessionController);
         ~PageManager() = default;
         PageManager(const PageManager&) = delete;
         PageManager& operator=(const PageManager&) = delete;
@@ -36,9 +38,11 @@ namespace apkupdaternew::application::core {
         // IPageNavigator
         //
         bool Navigate(std::string_view pageName) override;
-        bool Trigger(NavigationTrigger trigger) override;
-        bool Trigger(NavigationTrigger trigger, std::unique_ptr<base::NavigationStateBase> state) override;
-        bool NavigateBack(std::unique_ptr<base::NavigationStateBase> result = {}) override;
+        bool Trigger(NavigationTrigger navigationTrigger) override;
+        bool Trigger(
+            NavigationTrigger navigationTrigger,
+            std::unique_ptr<base::NavigationStateBase> navigationState) override;
+        bool NavigateBack(std::unique_ptr<base::NavigationStateBase> navigationResult = {}) override;
 
         void Initialize(xaml::Size size);
         void Resize(xaml::Size size);
@@ -74,9 +78,13 @@ namespace apkupdaternew::application::core {
             const NavigationRoute* incomingRoute;
         };
         static std::span<const NavigationRoute> Routes();
-        std::string_view ResolveTarget(const NavigationRoute& route) const;
-        bool Navigate(const NavigationRoute& route, std::unique_ptr<base::NavigationStateBase> state);
-        static bool IsNavigationDataValid(const NavigationRoute& route, const base::NavigationStateBase* state);
+        std::string_view ResolveTarget(const NavigationRoute& navigationRoute) const;
+        bool Navigate(
+            const NavigationRoute& navigationRoute,
+            std::unique_ptr<base::NavigationStateBase> navigationState);
+        static bool IsNavigationDataValid(
+            const NavigationRoute& navigationRoute,
+            const base::NavigationStateBase* navigationState);
         void AttachAnimations();
         void UpdateTransition();
 

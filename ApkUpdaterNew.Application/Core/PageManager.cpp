@@ -13,8 +13,10 @@
 #include <array>
 
 namespace apkupdaternew::application::core {
-    PageManager::PageManager(model::ApplicationRepository& repository, AppSessionController& controller)
-        : context{*this, repository, controller, controller}
+    PageManager::PageManager(
+        model::ApplicationRepository& applicationRepository,
+        AppSessionController& appSessionController)
+        : context{*this, applicationRepository, appSessionController, appSessionController}
         , pages(this->context) {
     }
 
@@ -36,21 +38,23 @@ namespace apkupdaternew::application::core {
         return false;
     }
 
-    bool PageManager::Trigger(NavigationTrigger trigger) {
-        return this->Trigger(trigger, {});
+    bool PageManager::Trigger(NavigationTrigger navigationTrigger) {
+        return this->Trigger(navigationTrigger, {});
     }
 
-    bool PageManager::Trigger(NavigationTrigger trigger, std::unique_ptr<base::NavigationStateBase> state) {
+    bool PageManager::Trigger(
+        NavigationTrigger navigationTrigger,
+        std::unique_ptr<base::NavigationStateBase> navigationState) {
         for (const auto& route : this->Routes()) {
-            if (route.source == this->CurrentPageName() && route.trigger == trigger) {
-                return this->Navigate(route, std::move(state));
+            if (route.source == this->CurrentPageName() && route.trigger == navigationTrigger) {
+                return this->Navigate(route, std::move(navigationState));
             }
         }
         return false;
     }
 
-    bool PageManager::NavigateBack(std::unique_ptr<base::NavigationStateBase> result) {
-        return this->Trigger(NavigationTrigger::navigateBack, std::move(result));
+    bool PageManager::NavigateBack(std::unique_ptr<base::NavigationStateBase> navigationResult) {
+        return this->Trigger(NavigationTrigger::navigateBack, std::move(navigationResult));
     }
 
     //
@@ -65,7 +69,9 @@ namespace apkupdaternew::application::core {
             return;
         }
         this->viewport = size;
-        this->pages.ForEach([size](interface::IPage& page) { page.Initialize(size); });
+        this->pages.ForEach([size](interface::IPage& page) {
+            page.Initialize(size);
+        });
         this->currentPage = this->pages.Find(ui::page::MainPageViewModel::PageName);
         const NavigationRequest request{{}, this->currentPage->Name(), NavigationTrigger::navigateBack};
         if (!this->currentPage->OnNavigatingTo(request, {})) {
@@ -80,7 +86,9 @@ namespace apkupdaternew::application::core {
             throw std::invalid_argument("Viewport dimensions must be positive");
         }
         this->viewport = size;
-        this->pages.ForEach([size](interface::IPage& page) { xaml::layoutInViewport(page.Root(), size); });
+        this->pages.ForEach([size](interface::IPage& page) {
+            xaml::layoutInViewport(page.Root(), size);
+        });
         this->dirty = true;
     }
 
@@ -194,7 +202,9 @@ namespace apkupdaternew::application::core {
         std::vector<std::unique_ptr<base::NavigationStateBase>> states;
         for (const auto id : ids) {
             const auto available = this->Routes();
-            const auto found = std::find_if(available.begin(), available.end(), [id](const auto& route) { return route.id == id; });
+            const auto found = std::find_if(available.begin(), available.end(), [id](const auto& route) {
+                return route.id == id;
+            });
             if (found == available.end() || simulated.empty() || found->source != simulated.back()) {
                 error = "Transition is not available on the current page";
                 return false;
@@ -267,43 +277,52 @@ namespace apkupdaternew::application::core {
         return routes;
     }
 
-    std::string_view PageManager::ResolveTarget(const NavigationRoute& route) const {
-        if (route.targetKind == NavigationTargetKind::page) {
-            return route.target;
+    std::string_view PageManager::ResolveTarget(const NavigationRoute& navigationRoute) const {
+        if (navigationRoute.targetKind == NavigationTargetKind::page) {
+            return navigationRoute.target;
         }
         return this->history.size() < 2 ? std::string_view{} : this->history[this->history.size() - 2].page->Name();
     }
 
-    bool PageManager::Navigate(const NavigationRoute& route, std::unique_ptr<base::NavigationStateBase> state) {
-        auto* target = this->pages.Find(this->ResolveTarget(route));
+    bool PageManager::Navigate(
+        const NavigationRoute& navigationRoute,
+        std::unique_ptr<base::NavigationStateBase> navigationState) {
+        const auto updatePhase = this->context.controller.Updates().State().phase;
+        if (updatePhase != UpdatePhase::idle && updatePhase != UpdatePhase::closed) {
+            return false;
+        }
+        auto* target = this->pages.Find(this->ResolveTarget(navigationRoute));
         if (this->navigating || this->IsTransitioning() || target == nullptr || target == this->currentPage
-            || this->currentPage == nullptr || route.source != this->CurrentPageName()) {
+            || this->currentPage == nullptr || navigationRoute.source != this->CurrentPageName()) {
             return false;
         }
         this->navigating = true;
         struct NavigationGuard final {
             bool& active;
-            ~NavigationGuard() { active = false; }
+            ~NavigationGuard() {
+                active = false;
+            }
         } guard{this->navigating};
-        const NavigationRequest request{route.source, target->Name(), route.trigger};
-        auto outgoingState = this->currentPage->OnNavigatingFrom(request);
-        if (!state) {
-            state = std::move(outgoingState);
+        const NavigationRequest navigationRequest{navigationRoute.source, target->Name(), navigationRoute.trigger};
+        auto outgoingState = this->currentPage->OnNavigatingFrom(navigationRequest);
+        if (!navigationState) {
+            navigationState = std::move(outgoingState);
         }
-        if (!this->IsNavigationDataValid(route, state.get()) || !target->OnNavigatingTo(request, std::move(state))) {
+        if (!this->IsNavigationDataValid(navigationRoute, navigationState.get())
+            || !target->OnNavigatingTo(navigationRequest, std::move(navigationState))) {
             return false;
         }
         this->input.Cancel();
         this->outgoingPage = this->currentPage;
         this->currentPage = target;
-        if (route.targetKind == NavigationTargetKind::previousPage) {
+        if (navigationRoute.targetKind == NavigationTargetKind::previousPage) {
             this->history.pop_back();
         } else {
-            this->history.push_back({target, &route});
+            this->history.push_back({target, &navigationRoute});
         }
         this->outgoingPage->Root().SetVisibility(xaml::attr::Visibility::collapsed);
         this->Root().SetVisibility(xaml::attr::Visibility::visible);
-        const std::string direction = route.targetKind == NavigationTargetKind::previousPage ? "Backward" : "Forward";
+        const std::string direction = navigationRoute.targetKind == NavigationTargetKind::previousPage ? "Backward" : "Forward";
         for (auto* page : {this->outgoingPage, this->currentPage}) {
             xaml::VisualStateManager::GoToState(page->Root(), "NavigationDirection", "Idle", false);
             xaml::VisualStateManager::GoToState(page->Root(), "NavigationDirection", direction);
@@ -314,11 +333,14 @@ namespace apkupdaternew::application::core {
         return true;
     }
 
-    bool PageManager::IsNavigationDataValid(const NavigationRoute& route, const base::NavigationStateBase* state) {
-        if (route.dataContract == nullptr) {
-            return state == nullptr;
+    bool PageManager::IsNavigationDataValid(
+        const NavigationRoute& navigationRoute,
+        const base::NavigationStateBase* navigationState) {
+        if (navigationRoute.dataContract == nullptr) {
+            return navigationState == nullptr;
         }
-        return state == nullptr ? !route.dataContract->isRequired : state->TypeId() == route.dataContract->typeId;
+        return navigationState == nullptr ? !navigationRoute.dataContract->isRequired
+            : navigationState->TypeId() == navigationRoute.dataContract->typeId;
     }
 
     void PageManager::AttachAnimations() {

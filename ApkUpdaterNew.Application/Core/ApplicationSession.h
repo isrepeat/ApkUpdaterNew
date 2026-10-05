@@ -8,7 +8,9 @@
 namespace apkupdaternew::application::core {
     class ApplicationSession final {
     public:
-        explicit ApplicationSession(model::ApplicationStateDocument document = {}, ApplicationStateStore::DocumentSaveHandler save = {});
+        explicit ApplicationSession(
+            model::ApplicationStateDocument applicationStateDocument = {},
+            ApplicationStateStore::DocumentSaveHandler save = {});
         ~ApplicationSession() = default;
         ApplicationSession(const ApplicationSession&) = delete;
         ApplicationSession& operator=(const ApplicationSession&) = delete;
@@ -32,5 +34,6 @@ namespace apkupdaternew::application::core {
         AppSessionController controller;
         PageManager pageManager;
         xaml::RendererRegistry renderers;
+        int updateRevision = 0;
     };
 }

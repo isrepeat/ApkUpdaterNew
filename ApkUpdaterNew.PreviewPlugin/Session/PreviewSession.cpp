@@ -2,10 +2,13 @@
 
 #include <stdexcept>
 #include <cctype>
+#include <regex>
 
 namespace apkupdaternew::preview::session {
     PreviewSession::PreviewSession(int width, int height)
-        : navigation(*this) {
+        : packageInstaller(this->applicationSession.Controller().Updates())
+        , viewport{static_cast<float>(width), static_cast<float>(height)}
+        , navigation(*this) {
         if (width <= 0 || height <= 0) {
             throw std::invalid_argument("Preview session dimensions must be positive");
         }
@@ -44,6 +47,7 @@ namespace apkupdaternew::preview::session {
     }
 
     void PreviewSession::Resize(int width, int height) {
+        this->viewport = {static_cast<float>(width), static_cast<float>(height)};
         this->applicationSession.Resize({static_cast<float>(width), static_cast<float>(height)});
     }
 
@@ -53,6 +57,19 @@ namespace apkupdaternew::preview::session {
 
     void PreviewSession::SetAnimationPlaybackRate(float value) {
         this->applicationSession.Pages().SetAnimationPlaybackRate(value);
+        this->packageInstaller.SetRate(value);
+    }
+
+    void PreviewSession::ApplyScenario(std::string_view json) {
+        // Небольшой строгий контракт сценария: ровно один строковый идентификатор.
+        static const std::regex pattern(R"re(^\s*\{\s*"scenario"\s*:\s*"([a-z-]+)"\s*\}\s*$)re");
+        const std::string text(json);
+        std::smatch match;
+        if (!std::regex_match(text, match, pattern)) {
+            throw std::invalid_argument("Expected {\"scenario\":\"success\"}");
+        }
+        this->packageInstaller.Configure(match[1].str());
+        this->applicationSession.Update();
     }
 
     void PreviewSession::PointerDown(float x, float y) {
@@ -72,11 +89,31 @@ namespace apkupdaternew::preview::session {
     }
 
     bool PreviewSession::Update() {
+        this->packageInstaller.Tick();
         return this->applicationSession.Update();
     }
 
     void PreviewSession::Render(xaml::IRenderBackend& renderer) {
+        // Подложка принадлежит только preview: имитация приложения под updater.
+        const auto& state = this->applicationSession.Controller().Updates().State();
+        const bool applicationStopped = state.phase == application::core::UpdatePhase::installing
+            || state.phase == application::core::UpdatePhase::launching || (state.installed && !state.launched);
+        renderer.DrawRoundedRect({0, 0, this->viewport.width, this->viewport.height}, {0.91f, 0.94f, 0.98f, 1}, 0);
+        if (!applicationStopped) {
+            renderer.DrawRoundedRect({0, 0, this->viewport.width, 180}, {0.16f, 0.30f, 0.52f, 1}, 0);
+            renderer.DrawText({40, 72, this->viewport.width - 80, 64}, "DocumentTranslator", {1, 1, 1, 1}, 36, "Bold", xaml::attr::Alignment::left);
+            for (int i = 0; i < 4; ++i) {
+                renderer.DrawRoundedRect({32, 220.f + i * 150, this->viewport.width - 64, 120}, {1, 1, 1, 1}, 16);
+                renderer.DrawText({56, 252.f + i * 150, this->viewport.width - 112, 56}, "Документ " + std::to_string(i + 1),
+                    {0.16f, 0.22f, 0.32f, 1}, 28, "Normal", xaml::attr::Alignment::left);
+            }
+        } else {
+            renderer.DrawText({40, 72, this->viewport.width - 80, 64}, "Рабочий стол", {0.16f, 0.22f, 0.32f, 1}, 36, "Bold", xaml::attr::Alignment::left);
+        }
         this->applicationSession.Render(renderer);
+        if (this->CurrentPage() == "MainPage" && this->Root().Background().alpha >= 0.9999f && this->Root().Opacity() >= 1) {
+            this->applicationSession.Controller().Updates().OpaqueFramePresented();
+        }
     }
 
     std::vector<std::string> PreviewSession::ParseNavigationTransitionIds(std::string_view json) {

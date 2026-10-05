@@ -28,4 +28,8 @@ namespace apkupdaternew::application::core {
     void AppSessionController::SetStatus(std::string value) {
         this->status = std::move(value);
     }
+
+    UpdateController& AppSessionController::Updates() {
+        return this->updates;
+    }
 }

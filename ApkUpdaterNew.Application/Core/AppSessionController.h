@@ -1,5 +1,6 @@
 #pragma once
 #include "../Interface/IHostCommandDispatcher.h"
+#include "./UpdateController.h"
 
 #include <functional>
 
@@ -18,9 +19,11 @@ namespace apkupdaternew::application::core {
         void SetHostEventHandler(HostEventHandler hostEventHandler);
         const std::string& Status() const;
         void SetStatus(std::string value);
+        UpdateController& Updates();
 
     private:
         HostEventHandler hostEventHandler;
         std::string status;
+        UpdateController updates;
     };
 }

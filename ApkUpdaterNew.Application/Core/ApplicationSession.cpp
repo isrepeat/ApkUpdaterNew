@@ -59,7 +59,9 @@ namespace apkupdaternew::application::core {
     }
 
     bool ApplicationSession::Update() {
-        return this->pageManager.Update();
+        const bool changed = this->updateRevision != this->controller.Updates().State().revision;
+        this->updateRevision = this->controller.Updates().State().revision;
+        return this->pageManager.Update() || changed;
     }
 
     void ApplicationSession::Render(xaml::IRenderBackend& renderer) {

@@ -1,0 +1,8 @@
+{
+  "Успешное обновление": { "scenario": "success" },
+  "Переустановка": { "scenario": "reinstall" },
+  "Отмена подтверждения": { "scenario": "cancel" },
+  "Неверный APK": { "scenario": "invalid-apk" },
+  "Ошибка установки": { "scenario": "install-error" },
+  "Ошибка запуска": { "scenario": "launch-error" }
+}

@@ -1,70 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Page id="mainPage"
-      background="#801E1E1E"
+<?xaml-preview-scenario path="UpdateScenarios.json"?>
+<Page id="mainPage" background="#801E1E1E"
       xmlns="urn:apkupdaternew:xaml"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Page.Storyboards>
         <Storyboard trigger="Show">
-            <ColorAnimation property="background"
-                            from="#FF1E1E1E"
-                            to="#801E1E1E"
-                            duration="300"
-                            easing="CubicOut"/>
+            <ColorAnimation property="background" from="#FF1E1E1E" to="#801E1E1E" duration="300" easing="CubicOut"/>
         </Storyboard>
     </Page.Storyboards>
-    <StackPanel width="320"
-                verticalAlignment="Center"
-                horizontalAlignment="Center"
-                orientation="Vertical">
-        <TextBlock id="packageVersionText"
-                   margin="0 0 0 25"
-                   horizontalAlignment="Center"
-                   fontSize="42"
-                   fontWeight="Bold"
-                   foreground="#CCFFFFFF"
-                   text="{Binding PackageVersion}"/>
-        <TextBlock id="helloText"
-                   margin="0 0 0 20"
-                   horizontalAlignment="Center"
-                   fontSize="32"
-                   fontWeight="Bold"
-                   foreground="#FFFFFF"
-                   textWrapping="Wrap"
-                   text="Полупрозрачное окно OpenGLES"/>
-        <Button id="openSettingsButton"
-                height="72"
-                margin="0 0 0 20"
-                contentAlignment="Center"
-                fontSize="36"
-                fontWeight="Bold"
-                foreground="#FFFFFF"
-                background="#3A6EA5"
-                command="{Binding NavigateToSettingsCommand}"
-                text="Open settings"/>
-        <Button id="updateButton"
-                height="72"
-                margin="0 0 0 16"
-                contentAlignment="Center"
-                fontSize="36"
-                fontWeight="Bold"
-                foreground="#FFFFFF"
-                background="#3A6EA5"
-                command="{Binding RequestApplicationUpdateCommand}"
-                text="Update"/>
-        <Button id="sendLogsButton"
-                height="72"
-                margin="0 0 0 16"
-                contentAlignment="Center"
-                fontSize="36"
-                fontWeight="Bold"
-                foreground="#FFFFFF"
-                background="#3A6EA5"
-                command="{Binding SendLogsCommand}"
-                text="Send logs"/>
-        <TextBlock id="statusText"
-                   fontSize="32"
-                   foreground="#FFFFFF"
-                   textWrapping="Wrap"
-                   text="{Binding Status}"/>
-    </StackPanel>
+    <VisualStateManager.VisualStateGroups>
+        <VisualStateGroup name="UpdateBackground">
+            <VisualState name="Transparent">
+                <Storyboard>
+                    <ColorAnimation targetName="mainPage" property="background" from="Current" to="#801E1E1E" duration="300" easing="CubicOut"/>
+                </Storyboard>
+            </VisualState>
+            <VisualState name="Opaque">
+                <Storyboard>
+                    <ColorAnimation targetName="mainPage" property="background" from="Current" to="#FF1E1E1E" duration="300" easing="CubicOut"/>
+                </Storyboard>
+            </VisualState>
+            <VisualState name="Closed">
+                <Storyboard>
+                    <ColorAnimation targetName="mainPage" property="background" from="Current" to="#001E1E1E" duration="200" easing="CubicOut"/>
+                </Storyboard>
+            </VisualState>
+        </VisualStateGroup>
+    </VisualStateManager.VisualStateGroups>
+    <Grid horizontalAlignment="Stretch" verticalAlignment="Stretch">
+        <StackPanel visibility="{Binding ShowAndroidTools}" margin="40" verticalAlignment="Center" orientation="Vertical">
+            <TextBlock text="ApkUpdaterNew" fontSize="36" foreground="#FFFFFF" fontWeight="Bold"/>
+            <TextBlock text="{Binding PackageVersion}" fontSize="28" foreground="#BFCBDA" margin="0 0 12 24"/>
+            <Button text="Open settings" command="{Binding NavigateToSettingsCommand}" height="72" fontSize="28" background="#397DDD" foreground="#FFFFFF" margin="0 0 0 16"/>
+            <Button text="Update" command="{Binding RequestApplicationUpdateCommand}" height="72" fontSize="28" background="#397DDD" foreground="#FFFFFF" margin="0 0 0 16"/>
+            <Button text="Send logs" command="{Binding SendLogsCommand}" height="72" fontSize="28" background="#397DDD" foreground="#FFFFFF" margin="0 0 0 16"/>
+            <TextBlock text="{Binding Status}" fontSize="26" foreground="#FFFFFF" textWrapping="Wrap"/>
+        </StackPanel>
+        <Border visibility="{Binding ShowLauncher}" background="#FF202938" cornerRadius="24"
+                margin="32" padding="32" verticalAlignment="Bottom" horizontalAlignment="Stretch">
+            <StackPanel orientation="Vertical">
+                <TextBlock text="{Binding Heading}" fontSize="32" fontWeight="Bold" foreground="#FFFFFF"/>
+                <TextBlock text="{Binding Detail}" fontSize="24" foreground="#BFCBDA" textWrapping="Wrap" margin="0 0 12 24"/>
+                <Button id="startUpdateButton" text="Начать обновление" command="{Binding StartUpdateCommand}"
+                        height="72" fontSize="28" fontWeight="Bold" background="#397DDD" foreground="#FFFFFF" contentAlignment="Center"/>
+            </StackPanel>
+        </Border>
+        <Border visibility="{Binding ShowCard}" background="#FF252A33" cornerRadius="24"
+                margin="40" padding="32" verticalAlignment="Center" horizontalAlignment="Stretch">
+            <StackPanel orientation="Vertical">
+                <TextBlock text="ОБНОВЛЕНИЕ ПРИЛОЖЕНИЯ" fontSize="20" foreground="#90BFFF" margin="0 0 0 20"/>
+                <TextBlock id="updateHeading" text="{Binding Heading}" fontSize="34" fontWeight="Bold" foreground="#FFFFFF" textWrapping="Wrap"/>
+                <TextBlock id="updateVersions" text="{Binding Versions}" fontSize="26" foreground="#D8E2EF" margin="0 0 20 20" textWrapping="Wrap"/>
+                <TextBlock id="updateDetail" text="{Binding Detail}" fontSize="24" foreground="#ABB8C9" textWrapping="Wrap" margin="0 0 0 20"/>
+                <StackPanel visibility="{Binding ShowProgress}" orientation="Vertical" margin="0 0 0 20">
+                    <TextBlock id="updateProgress" text="{Binding ProgressText}" fontSize="30" foreground="#FFFFFF" margin="0 0 0 16"/>
+                    <Grid id="updateProgressTrack" height="12" background="#39414D">
+                        <columnDefinitions>
+                            <columnDefinition width="*"/><columnDefinition width="*"/>
+                            <columnDefinition width="*"/><columnDefinition width="*"/>
+                            <columnDefinition width="*"/><columnDefinition width="*"/>
+                            <columnDefinition width="*"/><columnDefinition width="*"/>
+                            <columnDefinition width="*"/><columnDefinition width="*"/>
+                        </columnDefinitions>
+                        <Border id="progressSegment10" gridColumn="0" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                        <Border id="progressSegment20" gridColumn="1" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                        <Border id="progressSegment30" gridColumn="2" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                        <Border id="progressSegment40" gridColumn="3" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                        <Border id="progressSegment50" gridColumn="4" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                        <Border id="progressSegment60" gridColumn="5" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                        <Border id="progressSegment70" gridColumn="6" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                        <Border id="progressSegment80" gridColumn="7" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                        <Border id="progressSegment90" gridColumn="8" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                        <Border id="progressSegment100" gridColumn="9" height="12" background="#69A6FF" margin="1 1 0 0" visibility="Collapsed"/>
+                    </Grid>
+                </StackPanel>
+                <Button id="acceptUpdateButton" text="{Binding AcceptText}" visibility="{Binding ShowAccept}" command="{Binding AcceptUpdateCommand}"
+                        height="72" fontSize="28" fontWeight="Bold" background="#397DDD" foreground="#FFFFFF" contentAlignment="Center" margin="0 0 0 12"/>
+                <Button id="cancelUpdateButton" text="{Binding CancelText}" visibility="{Binding ShowCancel}" command="{Binding CancelUpdateCommand}"
+                        height="64" fontSize="26" background="#39414D" foreground="#FFFFFF" contentAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
 </Page>
