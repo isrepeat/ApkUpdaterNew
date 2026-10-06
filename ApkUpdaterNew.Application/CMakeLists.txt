@@ -37,6 +37,7 @@ set_target_properties(apkupdaternew_application PROPERTIES POSITION_INDEPENDENT_
 target_compile_features(apkupdaternew_application PUBLIC cxx_std_20)
 target_include_directories(apkupdaternew_application PUBLIC "${apkupdaternew_project_root}")
 target_link_libraries(apkupdaternew_application PUBLIC
+    AndroidApplication::Framework
     XamlRuntime::Logging
     XamlRuntime::Runtime)
 if (NOT ANDROID)

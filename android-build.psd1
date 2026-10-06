@@ -1,5 +1,5 @@
 @{
-    AndroidBuildToolsVersion = '1.0.63.22'
+    AndroidBuildToolsVersion = '1.0.63.27'
     ArtifactName = 'ApkUpdaterNew'
     PackageId = 'com.isrepeat.apkupdaternew'
     AndroidModule = 'ApkUpdaterNew.Android'
